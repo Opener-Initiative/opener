@@ -1,0 +1,6 @@
+# Copyright (c) 2026 Codium Electronique
+# SPDX-License-Identifier: Apache-2.0
+
+name: driver_nrf91
+append:
+  EXTRA_CONF_FILE: driver_nrf91.conf

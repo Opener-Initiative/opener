@@ -1,0 +1,20 @@
+/*
+ * Copyright (c) 2026 Codium Electronique
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#ifndef OPENER_BUILD_INFO_H_
+#define OPENER_BUILD_INFO_H_
+
+/* 
+ * @templates@ values come from cmake/gen_build_info.h.cmake
+ */
+
+#define OPENER_VERSION_MAJOR @OPENER_VERSION_MAJOR@
+#define OPENER_VERSION_MINOR @OPENER_VERSION_MINOR@
+#define OPENER_PATCHLEVEL    @OPENER_PATCHLEVEL@
+
+#define OPENER_GIT_COMMIT @OPENER_GIT_COMMIT@
+#define OPENER_DIRTY @OPENER_DIRTY@
+
+#endif /* OPENER_BUILD_INFO_H_ */

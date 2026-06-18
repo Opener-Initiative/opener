@@ -1,0 +1,21 @@
+# Copyright (c) 2026 Codium Electronique
+# SPDX-License-Identifier: Apache-2.0
+
+menu "DECT NR+ driver"
+
+choice DECTNRP_DRIVER_API
+    prompt "DECT NR+ driver API"
+    help
+      Specify the API used by the driver (scheduled or blocking)
+
+config DECTNRP_DRIVER_SCHEDULED_API
+    bool "Scheduled API"
+
+config DECTNRP_DRIVER_BLOCKING_API
+    bool "Blocking API"
+
+endchoice
+
+rsource "Kconfig.nrf91"
+
+endmenu

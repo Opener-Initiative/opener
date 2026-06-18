@@ -1,0 +1,7 @@
+sample:
+  name: driver_api
+  description: Demo of the dectnrp driver
+tests:
+  sample.driver_api:
+    platform_allow:
+      - nrf9151dk/nrf9151/ns

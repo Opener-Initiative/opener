@@ -1,0 +1,10 @@
+# Copyright (c) 2026 Codium Electronique
+# SPDX-License-Identifier: Apache-2.0
+
+module = OPENER_SAMPLE_DRIVER_API
+module-str = Opener DECT NR+ driver API sample
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
+menu "Zephyr Kernel"
+source "Kconfig.zephyr"
+endmenu

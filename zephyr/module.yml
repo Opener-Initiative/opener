@@ -1,0 +1,6 @@
+name: opener
+build:
+  cmake: .
+  kconfig: Kconfig
+  settings:
+    snippet_root: .

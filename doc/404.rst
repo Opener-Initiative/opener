@@ -1,0 +1,10 @@
+:orphan:
+
+Page not found
+##############
+
+The page you are looking for does not exist or has been moved.
+
+- Go back to the :doc:`documentation home <index>`.
+- Use the search box in the sidebar to find what you need.
+- Browse the `Opener repository <https://github.com/Opener-Initiative/opener>`_ on GitHub.

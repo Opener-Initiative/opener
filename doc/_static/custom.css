@@ -1,0 +1,90 @@
+/* Opener brand palette: #5a87ee (blue) → #a54aee (purple) */
+
+/* ── Sidebar top bar (search area + mobile header) ───────── */
+.wy-side-nav-search,
+.wy-nav-top {
+    background: linear-gradient(135deg, #5a87ee 0%, #a54aee 100%);
+}
+
+/* ── Logo sizing and color ────────────────────────────────── */
+.wy-side-nav-search > a img.logo {
+    width: 180px;
+    height: auto;
+    padding: 0.4rem 0;
+    filter: brightness(0) invert(1);
+}
+
+/* ── Sidebar navigation ───────────────────────────────────── */
+.wy-menu-vertical li.current > a,
+.wy-menu-vertical li.current li.toctree-l2 > a {
+    border-right: 3px solid #a54aee;
+}
+
+.wy-menu-vertical a:hover {
+    background-color: #1a1e3a;
+}
+
+/* ── Content links ────────────────────────────────────────── */
+.rst-content a,
+.rst-content a:visited {
+    color: #5a87ee;
+}
+
+.rst-content a:hover {
+    color: #a54aee;
+}
+
+/* ── Headings ─────────────────────────────────────────────── */
+.rst-content h1 {
+    border-bottom: 2px solid transparent;
+    border-image: linear-gradient(90deg, #5a87ee, #a54aee) 1;
+    padding-bottom: 0.3em;
+}
+
+/* ── Code blocks ──────────────────────────────────────────── */
+.rst-content div[class^="highlight"] pre {
+    border-left: 3px solid #5a87ee;
+    border-radius: 0 4px 4px 0;
+}
+
+/* ── Inline code ──────────────────────────────────────────── */
+.rst-content code.literal {
+    color: #5a87ee;
+    border-color: #d0d8f8;
+}
+
+/* ── Note / tip admonitions ───────────────────────────────── */
+.rst-content .note > .admonition-title,
+.rst-content .tip > .admonition-title,
+.rst-content .seealso > .admonition-title {
+    background-color: #5a87ee;
+}
+
+.rst-content .note,
+.rst-content .tip,
+.rst-content .seealso {
+    border-color: #5a87ee;
+}
+
+/* ── Warning / caution / important ───────────────────────── */
+.rst-content .warning > .admonition-title,
+.rst-content .caution > .admonition-title,
+.rst-content .important > .admonition-title {
+    background-color: #a54aee;
+}
+
+.rst-content .warning,
+.rst-content .caution,
+.rst-content .important {
+    border-color: #a54aee;
+}
+
+/* ── Breadcrumbs / footer links ───────────────────────────── */
+.wy-breadcrumbs a {
+    color: #5a87ee;
+}
+
+.rst-footer-buttons .btn-neutral {
+    color: #5a87ee !important;
+    border-color: #5a87ee;
+}
