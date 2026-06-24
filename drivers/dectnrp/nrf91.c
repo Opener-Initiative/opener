@@ -1,7 +1,7 @@
 /* Nordic nRF91x1 NR+ PHY driver
  *
  * Copyright (c) 2026 Codium Electronique
- * Copyright (c) 2026 Deveritech
+ * Copyright (c) 2026 Deveritec
  * SPDX-License-Identifier: Apache-2.0
  */
 

@@ -4,7 +4,7 @@
  */
 
 #ifndef DECTNRP_H_
-#define DECTNRP_H
+#define DECTNRP_H_
 
 #ifdef __cplusplus
 extern "C" {
