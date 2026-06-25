@@ -10,9 +10,9 @@
 
 #include <opener/build_info.h>
 
-#include <dectnrp/driver.h>
+#include <zephyr/net/dectnrp/driver.h>
 
-LOG_MODULE_REGISTER(opener_phy_sample, CONFIG_OPENER_SAMPLE_DRIVER_API_LOG_LEVEL);
+LOG_MODULE_REGISTER(dectnrp, CONFIG_SAMPLE_DRIVER_DECTNRP_LOG_LEVEL);
 
 void dectnrp_l2_init(struct net_if *iface)
 {
@@ -25,6 +25,6 @@ int main()
 	LOG_DBG("Opener version %d.%d.%d-%s%c", OPENER_VERSION_MAJOR, OPENER_VERSION_MINOR,
 		OPENER_PATCHLEVEL, STRINGIFY(OPENER_GIT_COMMIT), OPENER_DIRTY ? '+' : '=');
 
-	LOG_DBG("Opener PHY sample started");
+	LOG_DBG("Opener dectnrp driver sample started");
 	return 0;
 }

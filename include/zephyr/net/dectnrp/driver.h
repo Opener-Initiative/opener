@@ -14,8 +14,8 @@
  * holders for types representing related objects.
  */
 
-#ifndef DECTNRP_DRIVER_H_
-#define DECTNRP_DRIVER_H_
+#ifndef ZEPHYR_NET_DECTNRP_DRIVER_H_
+#define ZEPHYR_NET_DECTNRP_DRIVER_H_
 
 #include <zephyr/types.h>
 #include <zephyr/kernel.h>
@@ -413,4 +413,4 @@ void dectnrp_l2_init(struct net_if *iface);
 }
 #endif
 
-#endif /* DECTNRP_DRIVER_H_ */
+#endif /* ZEPHYR_NET_DECTNRP_DRIVER_H_ */

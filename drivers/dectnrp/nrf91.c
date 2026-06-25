@@ -1,7 +1,7 @@
 /* Nordic nRF91x1 NR+ PHY driver
  *
+ * Copyright (c) 2026 Deveritec GmbH.
  * Copyright (c) 2026 Codium Electronique
- * Copyright (c) 2026 Deveritec
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -12,7 +12,7 @@
 #include <zephyr/net/net_time.h>
 #include <zephyr/net/net_pkt.h>
 
-#include <dectnrp/driver.h>
+#include <zephyr/net/dectnrp/driver.h>
 
 LOG_MODULE_REGISTER(dectnrp_driver_nrf91, CONFIG_DECTNRP_DRIVER_NRF91_LOG_LEVEL);
 

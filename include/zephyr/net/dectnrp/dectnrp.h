@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef DECTNRP_H_
-#define DECTNRP_H_
+#ifndef ZEPHYR_NET_DECTNRP_H_
+#define ZEPHYR_NET_DECTNRP_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,4 +21,4 @@ extern "C" {
 }
 #endif
 
-#endif /* DECTNRP_H_ */
+#endif /* ZEPHYR_NET_DECTNRP_H_ */

@@ -1,5 +1,5 @@
 sample:
-  name: driver_api
+  name: dectnrp
   description: Demo of the dectnrp driver
 tests:
   sample.driver_api:

@@ -7,4 +7,4 @@ and use the stack in your projects.
 .. toctree::
    :maxdepth: 1
 
-   driver_api/README
+   drivers/index
