@@ -1,5 +1,23 @@
 # Contributing to Opener
 
+## Signing off on your commits
+
+*Opener* uses the [Developer Certificate of Origin (DCO)](https://developercertificate.org/) rather than a Contributor License Agreement (CLA). This means that you are required to sign off on every commit to signal that you affirm the DCO, which essentially states that you have the right to contribute your work and that you understand the contribution and its sign-off become a permanent part of the public Git history. Since you are personally certifying your contribution, anonymous or pseudonymous sign-offs are not accepted. Use a real name and a working email.
+
+The same mechanism is used by upstream Zephyr, so if you have contributed there, the workflow will already be familiar. The simplest way to add a `Signed-off-by` line to your commits is to let Git handle it for you:
+
+```
+git commit -s -m "Your commit message"
+```
+
+This appends a line in the form:
+
+```
+Signed-off-by: Jane Doe <jane@example.com>
+```
+
+Git fills in the name and email from your `user.name` and `user.email` settings.
+
 ## Use of AI assistants in contributions
 
 Large Language Models (LLMs) and AI-based coding tools have become part of many developers' everyday workflows. The *Opener Initiative* does not prohibit their use, but we ask contributors to apply them thoughtfully and within the expectations described below.
