@@ -1,0 +1,11 @@
+{
+    // https://github.com/zephyrproject-rtos/docker-image
+    "image": "ghcr.io/zephyrproject-rtos/ci:v0.29.2",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools"
+            ]
+        }
+    }
+}
