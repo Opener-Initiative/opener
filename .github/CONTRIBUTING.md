@@ -18,6 +18,15 @@ Signed-off-by: Jane Doe <jane@example.com>
 
 Git fills in the name and email from your `user.name` and `user.email` settings.
 
+## Coding and style guidelines
+
+*Opener* adopts the coding and style conventions from Zephyr, rather than defining its own:
+
+- [Coding Guidelines](https://docs.zephyrproject.org/latest/contribute/coding_guidelines/index.html)
+- [Style Guidelines](https://docs.zephyrproject.org/latest/contribute/style/index.html)
+
+The `.clang-format` at the repository root is copied from upstream Zephyr; running `clang-format` handles most formatting for you.
+
 ## Use of AI assistants in contributions
 
 Large Language Models (LLMs) and AI-based coding tools have become part of many developers' everyday workflows. The *Opener Initiative* does not prohibit their use, but we ask contributors to apply them thoughtfully and within the expectations described below.
