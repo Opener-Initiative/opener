@@ -25,7 +25,7 @@ Git fills in the name and email from your `user.name` and `user.email` settings.
 - [Coding Guidelines](https://docs.zephyrproject.org/latest/contribute/coding_guidelines/index.html)
 - [Style Guidelines](https://docs.zephyrproject.org/latest/contribute/style/index.html)
 
-The `.clang-format` at the repository root is copied from upstream Zephyr; running `clang-format` handles most formatting for you. Because clang-format's output can change between releases, please use version 21.1.8, which is the version we have agreed on.
+The `.clang-format` at the repository root is copied from upstream Zephyr; running `clang-format` handles most formatting for you. Because clang-format's output can change between releases, please use version 21.1.8, which is the version pinned in CI.
 
 ## Use of AI assistants in contributions
 

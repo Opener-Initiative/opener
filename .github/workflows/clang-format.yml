@@ -1,0 +1,30 @@
+name: clang-format
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - run: pip install clang-format==21.1.8
+
+      - env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          files=$(git diff --name-only --diff-filter=ACMR "$BASE_SHA" HEAD -- '*.c' '*.h')
+          for f in $files; do
+            clang-format --dry-run --Werror "$f" ||
+              echo "::warning file=$f::violation of coding style guidelines detected, please run clang-format"
+          done
