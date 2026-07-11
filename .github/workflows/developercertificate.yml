@@ -1,0 +1,32 @@
+name: DCO
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  dco:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          status=0
+          commits=$(git rev-list --no-merges "$BASE_SHA".."$HEAD_SHA")
+          for c in $commits; do
+            # Every commit must include a trailing "Signed-off-by: name <email>".
+            signoff=$(git show -s --format='%(trailers:key=Signed-off-by,valueonly)' "$c")
+            if ! grep -qE '^.+ <[^@>]+@[^@>]+>$' <<< "$signoff"; then
+              echo "::error::commit ${c:0:7} is not signed off; please affirm the DCO"
+              status=1
+            fi
+          done
+          exit $status
