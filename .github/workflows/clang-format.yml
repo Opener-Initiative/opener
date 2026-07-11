@@ -22,9 +22,11 @@ jobs:
 
       - env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          files=$(git diff --name-only --diff-filter=ACMR "$BASE_SHA" HEAD -- '*.c' '*.h')
+          set -euo pipefail
+          files=$(git diff --name-only --diff-filter=ACMR "$BASE_SHA"..."$HEAD_SHA" -- '*.c' '*.h')
           for f in $files; do
             clang-format --dry-run --Werror "$f" ||
-              echo "::warning file=$f::violation of coding style guidelines detected, please run clang-format"
+              echo "::warning file=$f::violation of coding style guidelines detected; please run clang-format"
           done
