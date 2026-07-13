@@ -4,5 +4,5 @@
 zephyr_library_named(dectnrp_driver)
 
 zephyr_library_sources_ifdef(CONFIG_DECTNRP_DRIVER_NRF91
-    nrf91.c
+    dectnrp_nrf91.c
 )

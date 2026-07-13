@@ -1,6 +1,6 @@
 /* DECT NR+ driver API
  *
- * Copyright (c) 2026 Deveritec GmbH.
+ * Copyright (c) 2026 Deveritec GmbH
  * Copyright (c) 2026 Codium Electronique
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -9,9 +9,11 @@
  * @file
  * @brief Public DECT NR+ Radio Driver API
  *
- * @attention This file contains pseudo code for demonstration purposes.
- * Definitions may be missing and in that case are only place
- * holders for types representing related objects.
+ * @note All references to the standard in this file cite ETSI TS 103 636 DECTNRP NR+ V2.2.1 (2026-05).
+ * 
+ * @attention This file contains code which is work in progress.
+ * Interfaces and objects may be not fully consistent.
+ * Be aware of some loose ends and unfinished features.
  */
 
 #ifndef ZEPHYR_NET_DECTNRP_DRIVER_H_
@@ -24,6 +26,7 @@
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/net_pkt.h>
 #include <zephyr/net/net_time.h>
+#include <zephyr/net/dectnrp.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,47 +42,39 @@ extern "C" {
  * @details This API provides a common representation of vendor-specific
  * hardware and firmware to the DECT NR+ L2.
  * **Application developers should never interface directly with this API.** It
- * is of interest to driver maintainers only.
+ * is of interest to driver/stack maintainers only.
  *
  * Implementing the basic driver API will ensure integration with the native L2
  * stack as well as basic support for DECT NR+.
  *
- * @note References are to the ETSI TS 103 636 DECTNRP NR+ V2.1.1 (2024-10) standard
+ * @note References are to the ETSI TS 103 636 DECTNRP NR+ V2.2.1 (2026-05) standard
  * If not further noted all references in this file refer to ETSI TS 103 636-4.
  *
  * @{
  */
 
-/*
- * FIXME: Stub structs until proper definitions
+/**
+ * @brief One RSSI1 measurement result.
+ * 
  */
-struct device_capabilities {
-	uint8_t _dummy;
-};
-
-struct dectnrp_config {
-	uint8_t _dummy;
-};
-
-enum dectnrp_config_type {
-	DECTNRP_CONFIG_TYPE_UNKNOWN = 0,
-};
-
 struct dectnrp_rssi1_result {
-	uint8_t _dummy;
-};
-
-struct dectnrp_rssi_mode {
-	uint8_t _dummy;
+	/** The result holds the rssi1 dbm values for each sub-slot for one frame. */
+	uint8_t subslot[DECTNRP_SUBSLOTS_PER_FRAME];
+	/** Related channel */
+	uint16_t channel;
 };
 
 /**
  * @brief Flags related to DECTNRP_DRIVER_OP_TX
  */
 struct dectnrp_tx_mode {
+	/** The tx operation is a scheduled one. If true a start-time has to be provided. */
 	uint8_t is_scheduled: 1;
+	/** The tx operation should done together with LBT. */
 	uint8_t is_lbt: 1;
+	/** The tx operation should done using harq. */
 	uint8_t is_harq: 1;
+	/** The tx operation sends a beacon. The driver may not be interested in this field. */
 	uint8_t is_beacon: 1;
 };
 
@@ -87,8 +82,18 @@ struct dectnrp_tx_mode {
  * @brief Flags related to DECTNRP_DRIVER_OP_RX
  */
 struct dectnrp_rx_mode {
+	/** The rx operation is a scheduled one. If true a start-time has to be provided. */
 	uint8_t is_scheduled: 1;
+	/** The rx operation wants to receive a beacon. The driver may not be interested in this field. */
 	uint8_t is_beacon: 1;
+};
+
+/**
+ * @brief Flags related to DECTNRP_DRIVER_OP_RSSI1
+ */
+struct dectnrp_rssi1_mode {
+	/** The rssi1 operation is a scheduled one. If true a start-time has to be provided. */
+	uint8_t is_scheduled: 1;
 };
 
 #ifdef CONFIG_DECTNRP_DRIVER_SCHEDULED_API
@@ -97,9 +102,31 @@ struct dectnrp_rx_mode {
  * @brief Enumerates all possible driver operation types.
  */
 enum dectnrp_driver_op_type {
+	/** The related operation is of tx type. */
 	DECTNRP_DRIVER_OP_TX,
+	/** The related operation is of rx type. */
 	DECTNRP_DRIVER_OP_RX,
+	/** The related operation is of rssi1 type. */
 	DECTNRP_DRIVER_OP_RSSI1,
+};
+
+/**
+ * List entry holds one parameter set (tbs, µ, beta, mcs, slots)
+ *
+ * See ETSI TS 103 636-3 V2.2.1 (2026-05) Table C.2-1 and Table C.3-1
+ *
+ */
+struct dectnrp_transport_parameters {
+	/** Transport Block Size [bytes] */
+	uint16_t tbs;
+	/** µ - 1 based */
+	uint8_t mu;
+	/** beta - 1 based */
+	uint8_t beta;
+	/** mcs - 0 based */
+	uint8_t mcs;
+	/** slots - 1 based */
+	uint8_t slots;
 };
 
 /**
@@ -111,54 +138,178 @@ struct dectnrp_driver_op {
 	uint16_t channel;
 	/** Start time this operation should be scheduled at in
 	 *  modem ticks.
-	 *  To be scheduled immediately if start_time == 0.
+	 *  If it should be scheduled immediately set start_time == 0.
 	 */
 	net_time_t start_time;
-	/** Operation type. */
+	/** Type of this operation. */
 	enum dectnrp_driver_op_type type;
 	union {
 		/** Parameters when type == DECTNRP_DRIVER_OP_TX. */
 		struct {
+			/** Mode flags related to this tx operation. */
 			struct dectnrp_tx_mode mode;
-			const void *resource;
+			/** Type of the PHY header encoded in pkt.
+			 * * phy_header_type=0 - PHY type 1 (size=5 bytes)
+			 * * phy_header_type=1 - PHY type 2 (size=10 bytes)
+			 */
+			uint8_t phy_header_type :1;
+			/** Transport parameters related to this operation */
+			struct dectnrp_transport_parameters transport_parameters;
+			/** Packet to be sent. */
 			struct net_pkt *pkt;
+			/** Resource related to this operation - not used yet. */
+			const void *resource;
 			/** Parameters when mode.is_lbt == true. */
 			struct {
+				/** Period of LBT in modem ticks. */
 				uint32_t period;
+				/** RSSI threshold above a channel is detected as free/possible. */
 				uint8_t rssi_threshold;
+				/** Current count value. */
 				uint8_t retry_count;
 			} lbt;
 		} tx;
 		/** Parameters when type == DECTNRP_DRIVER_OP_RX. */
 		struct {
+			/** Mode flags related to this rx operation. */
 			struct dectnrp_rx_mode mode;
+			/** Resource related to this operation - not used yet. */
 			const void *resource;
-			uint32_t duration;
+			/** The length of the RX window in modem ticks. */
+			net_time_t duration;
+			/** The RSSI level the modem can expect for this RX window.
+			 *  @todo This is taken directly from Nordic API. A more generic 
+			 *  approach should be elaborated.
+			 */
 			uint8_t expected_rssi;
 		} rx;
 		/** Parameters when type == DECTNRP_DRIVER_OP_RSSI1. */
 		struct {
+			/** Mode flags related to this RSSI1 operation. */
+			struct dectnrp_rssi1_mode mode;
+			/** Number of subslots to be measured. */
 			uint32_t subslots;
+			/** Reference to result storage where measured RSSI1 values should be stored.
+			 * Memory has to be kept available by the caller until DECTNRP_EVENT_OP_RESULTS is notified.
+			 */
 			struct dectnrp_rssi1_result *result;
 		} rssi1;
 	};
 
-	/** Holds the status of this operation. */
+	/** Holds the status of this operation. 
+	 *  @todo use generic (dectnrp specific) but vendor independent error codes! 
+	 */
 	int status;
 };
 
 /**
- * @brief Enumerate all events notified via dectnrp_event_cb_t.
+ * @brief Enumerate all events notified via dectnrp_driver_event_cb_t.
  */
-enum dectnrp_event {
-	/** An operation has been finished */
+enum dectnrp_driver_event_code {
+	DECTNRP_EVENT_NONE,
+	/** An message error occured. */
+	DECTNRP_EVENT_MSG_ERROR,
+	/** An message has been rececived. */
+	DECTNRP_EVENT_MSG_RECEIVED,
+	/** An operation has been finished. */
 	DECTNRP_EVENT_OP_FINISHED,
 	/** Provides RSSI1 results. */
 	DECTNRP_EVENT_OP_RESULTS,
 };
 
-union dectnrp_event_data {
+enum dectnrp_driver_error {
+	DECTNRP_ERROR_NO_ERROR,
+	DECTNRP_ERROR_PCC_CRC,
+	DECTNRP_ERROR_PDC_CRC,
+};
+
+struct dectnrp_driver_event {
+	/** Holds the code related to this event. */
+	enum dectnrp_driver_event_code code;
+
 	union {
+
+		/** DECTNRP_EVENT_MSG_ERROR */
+		struct {
+			/** Operation related to this message error. */
+			struct dectnrp_driver_op *op;
+			/** Holds the status of this operation. 
+			 *  FIXME use generic (dectnrp specific) but vendor independent error codes! 
+			 */
+			int status;
+			/** rssi2 contains a valid RSSI2 value. */
+			uint8_t rssi2_valid :1;
+			/** snr contains a valid RSSI2 value. */
+			uint8_t snr_valid :1;
+			/** pcc contains a valid PCC header value. */
+			uint8_t pcc_valid :1;
+			/** Type of the received PCC. */
+			uint8_t phy_type :1;
+
+			/** Related start time. */
+			net_time_t start_time;
+			/** Points to PCC if pcc_valid == true.  */
+			const uint8_t *pcc;
+			/** RSSI2 value of this message.
+			 *  Encoded according to @ref ETSI TS 103 636-2 chapter 8.3.
+			 * 
+			 * @todo It needs to be decided whether we want to transmit the RSSI2 according to spec.
+			 */
+			uint8_t rssi2;
+			/** SNR value of this message.
+			 *  Encoded according to @ref ETSI TS 103 636-2 chapter 8.4.
+			 * 
+			 * @todo It needs to be decided whether we want to transmit the SNR according to sp
+			 */
+			int8_t snr;
+		} message_error;
+
+		/** DECTNRP_EVENT_MSG_RECEIVED */
+		struct {
+			struct dectnrp_driver_op *op;
+			/** Holds the status of this operation. 
+			 *  FIXME use generic (dectnrp specific) but vendor independent error codes! 
+			 */
+			int status;
+			/** Type of the received PCC. */
+			uint8_t phy_type :1;
+			/** rssi2 contains a valid RSSI2 value. */
+			uint8_t rssi2_valid :1;
+			/** snr contains a valid RSSI2 value. */
+			uint8_t snr_valid :1;
+
+			/** Related start time. */
+			net_time_t start_time;
+			/** Points to PCC.  */
+			const uint8_t *pcc;
+			/** Points to PDC.  */
+			const uint8_t *pdc;
+			/** Number of bytes of PDC. */
+			uint32_t pdc_len;
+			/** RSSI2 value of this message.
+			 *  Encoded according to @ref ETSI TS 103 636-2 chapter 8.3.
+			 * 
+			 * @todo It needs to be decided whether we want to transmit the RSSI2 according to spec.
+			 */
+			uint8_t rssi2;
+			/** SNR value of this message.
+			 *  Encoded according to @ref ETSI TS 103 636-2 chapter 8.4.
+			 * 
+			 * @todo It needs to be decided whether we want to transmit the SNR according to sp
+			 */
+			int8_t snr;
+
+		} msg_received;
+
+		/** DECTNRP_EVENT_OP_RESULTS */
+		struct {
+			struct dectnrp_driver_op *op;
+			/** Holds the status of this operation. 
+			 *  FIXME use generic (dectnrp specific) but vendor independent error codes! 
+			 */
+			int status;
+		} rssi1_result;
+
 		/** DECTNRP_EVENT_OP_FINISHED */
 		/** DECTNRP_EVENT_OP_RESULTS */
 		struct {
@@ -167,11 +318,83 @@ union dectnrp_event_data {
 	};
 };
 
-/** Event callback function  */
-typedef void (*dectnrp_event_cb_t)(const struct device *dev, enum dectnrp_event evt,
-				   union dectnrp_event_data *event_data);
-
 #endif /* CONFIG_DECTNRP_DRIVER_SCHEDULED_API */
+
+/** Event callback function the dectnrp_driver is notifying events up to the stack.  */
+typedef void (*dectnrp_driver_event_cb_t)(const struct device *dev, const struct dectnrp_driver_event *event);
+
+/**
+ * @brief This flags supported features.
+ * 
+ * @attention Work in progress. 
+ * @todo We have to discuss the feature set.
+ * 
+ */
+enum dectnrp_hw_caps {
+	DECTNRP_HW_NO_CAPABILITY = 0x0,
+
+	DECTNRP_HW_PROMISC = BIT(1),   /* Promiscuous mode supported. */
+	DECTNRP_HW_FILTER = BIT(2),    /* Filter NETWORK ID, long/short addr. */
+	DECTNRP_HW_TXTIME = BIT(8),    /* TX at specified time supported. */
+	DECTNRP_HW_RXTIME = BIT(11),   /* RX at specified time supported. */
+	DECTNRP_HW_SYNCTIME = BIT(12), /* Synchronization via GPIO supported. */
+};
+
+/**
+ * @brief Keeps supported features and capabilities of the driver/radio.
+ * 
+ * @attention Work in progress.
+ * @todo We have to add more capabilities/features of driver/radio 
+ * which are/should be available/configurable at runtime.
+ * 
+ */
+struct dectnrp_device_capabilities {
+	enum dectnrp_hw_caps hw_caps;
+};
+
+enum dectnrp_config_type {
+	/** Value to distinguish uninitialized configurations. */
+	DECTNRP_CONFIG_TYPE_UNKNOWN = 0,
+	/** Specifies new driver event handler. Specifying NULL as a handler
+	 *  will disable driver events notification.
+	 */
+	DECTNRP_CONFIG_TYPE_EVENT_HANDLER,
+	/** Configure network id this device should belong to. */
+	DECTNRP_CONFIG_TYPE_NETWORK_ID,
+	/** Configure network id filter. */
+	DECTNRP_CONFIG_TYPE_FILTER_SHORT_NETWORK_ID,
+	/** Configure short receiver address filter. */
+	DECTNRP_CONFIG_TYPE_FILTER_SHORT_RECEIVER_ADDR,
+};
+
+/** dectnrp driver configuration data. */
+struct dectnrp_config {
+	/** Configuration data. */
+	union {
+		/** Parameters when type == DECTNRP_CONFIG_TYPE_EVENT_HANDLER. */
+		dectnrp_driver_event_cb_t event_handler;
+		/** Parameters when type == DECTNRP_CONFIG_TYPE_NETWORK_ID. */
+		uint32_t network_id;
+		/** Parameters when type == DECTNRP_CONFIG_TYPE_FILTER_SHORT_NETWORK_ID. */
+		struct {
+			/** Activates filter when true, deactivates filter when false. */
+			bool activate;
+			/** Short network-id. */
+			uint8_t value;
+		} filter_short_network_id;
+		/** Parameters when type == DECTNRP_CONFIG_TYPE_FILTER_SHORT_RECEIVER_ADDR. */
+		struct {
+			/** Activates filter when true, deactivates filter when false. */
+			bool activate;
+			/** Short short receiver-id. 
+			 * @attention This only applies to packages of PHY TYPE 2! Packages are filtered by the receiver
+ 			 * identity encoded in the PHY TYPE 2 header.
+ 			 * PHY TYPE 1 packages have not short address attached and are not be filtered!
+			*/
+			uint16_t value;
+		} filter_short_receiver_addr;
+	};
+};
 
 /**
  * @brief DECTNRP driver interface API.
@@ -248,6 +471,15 @@ struct dectnrp_driver_api {
 	int (*stop)(const struct device *dev);
 
 	/**
+	 * @brief Get the device hardware capabilities.
+	 *
+	 * @param dev pointer to DECTNRP driver device
+	 *
+	 * @return Bit field with all supported device driver capabilities.
+	 */
+	enum dectnrp_hw_caps (*get_hw_capabilities)(const struct device *dev);
+
+	/**
 	 * @brief Get the device driver capabilities.
 	 *
 	 * @param dev pointer to DECTNRP driver device
@@ -256,7 +488,7 @@ struct dectnrp_driver_api {
 	 * @retval 0 Capabilities successfully written to @p cap.
 	 * @retval -EIO The driver has some error.
 	 */
-	int (*get_capabilities)(const struct device *dev, struct device_capabilities *caps);
+	int (*get_capabilities)(const struct device *dev, struct dectnrp_device_capabilities *caps);
 
 	/**
 	 * @brief Set or update driver configuration.
@@ -291,12 +523,16 @@ struct dectnrp_driver_api {
 	/**
 	 * @brief Get the current modem time.
 	 *
+	 * @attention The returned modem time is in modem ticks!
+	 * 
+	 * @note We use modem time because one tick of it is 1/691200 seconds (~14,46 ns
+	 * per tick) - modem_time2ns gives rounding errors in that case.
+	 * 
 	 * @param dev pointer to DECTNRP driver device
-	 *
-	 * @return nanoseconds relative to the network subsystem's local clock,
-	 * -1 if an error occurred or the operation is not supported
+	 * @param time[out] The modem time has been copied into it when 0 has been returned.
+	 * @return 0 time successfully read into @p time
 	 */
-	net_time_t (*get_time)(const struct device *dev);
+	int (*get_time)(const struct device *dev, net_time_t *time);
 
 #ifdef CONFIG_DECTNRP_DRIVER_SCHEDULED_API
 
@@ -304,7 +540,7 @@ struct dectnrp_driver_api {
 	 * @brief Schedule given operation @p op.
 	 *
 	 * @note This function is non-blocking and just provides @p op to the driver which
-	 * in turn notifies completion back via dectnrp_event_cb_t.
+	 * in turn notifies completion back via dectnrp_driver_event_cb_t.
 	 *
 	 * @param dev pointer to DECTNRP driver device
 	 * @param op the operation to be scheduled.
@@ -374,7 +610,7 @@ struct dectnrp_driver_api {
 	 *
 	 * @retval 0 The rssi1 operation frame was successfully scheduled.
 	 */
-	int (*rssi1)(const struct device *dev, struct dectnrp_rssi_mode mode, uint32_t subslots,
+	int (*rssi1)(const struct device *dev, struct dectnrp_rssi1_mode mode, uint32_t subslots,
 		     struct dectnrp_rssi1_result *result);
 
 #endif /* CONFIG_DECTNRP_DRIVER_BLOCKING_API */
