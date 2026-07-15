@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: "3.x"
 
-      - run: pip install clang-format==21.1.8
+      - run: pip install clang-format==22.1.5
 
       - env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
