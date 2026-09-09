@@ -27,6 +27,16 @@ Git fills in the name and email from your `user.name` and `user.email` settings.
 
 The `.clang-format` at the repository root is copied from upstream Zephyr; running `clang-format` handles most formatting for you. Because clang-format's output can change between releases, please use version 22.1.5, which is the version pinned in CI.
 
+## What we expect in a pull request
+
+These guidelines are a starting point and will evolve over time. When in doubt, open an issue and ask.
+
+- **One self-contained logical change per pull request.** Small, clearly scoped PRs keep each change easy to reason about and avoid the situation where one part of a PR is ready to merge while another still needs major revision. If you are planning a larger feature, please open an issue to discuss the approach before investing significant work.
+- **Commit messages that explain the change.** Avoid huge commits and break your changes into smaller pieces instead. Use a concise title in the imperative form ("Add ...", "Fix ..."), followed by a body that explains what the change does and why. Every commit needs a `Signed-off-by` line, as described [above](#signing-off-on-your-commits).
+- **Traceability to the specification.** For non-trivial protocol logic, reference the relevant sections of ETSI TS 103 636 in the commit message or pull request description.
+- **A note on how you verified the change.** Please describe in the pull request how you convinced yourself that the change works. If sensible, add a test.
+- **Green CI.** The CI checks (formatting, DCO sign-off) must pass before a pull request can be merged.
+
 ## Use of AI assistants in contributions
 
 Large Language Models (LLMs) and AI-based coding tools have become part of many developers' everyday workflows. The *Opener Initiative* does not prohibit their use, but we ask contributors to apply them thoughtfully and within the expectations described below.
