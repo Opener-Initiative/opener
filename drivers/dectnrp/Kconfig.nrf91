@@ -1,15 +1,88 @@
 # Copyright (c) 2026 Codium Electronique
+# Copyright (c) 2026 Deveritec GmbH
 # SPDX-License-Identifier: Apache-2.0
 
 config DECTNRP_DRIVER_NRF91
     bool "DECT NR+ nRF91 driver"
     default y
-    depends on SOC_SERIES_NRF91
+    depends on SOC_SERIES_NRF91X
     depends on NRF_MODEM_LIB
     depends on !MODEM_ANTENNA
     depends on NRF_MODEM_LINK_BINARY_DECT_PHY
 
 if DECTNRP_DRIVER_NRF91
+
+menu "DECTNRP Radio interface"
+# Following configs belong to the radio interface.
+
+menu "DECTNRP nRF91 driver capabilities"
+
+config DECTNRP_DRIVER_RDCAP_DECTNRP_RELEASE
+	int
+	default 1
+
+config DECTNRP_DRIVER_RDCAP_POWERCLASS_MAX
+	int
+	default 3 if SOC_NRF9161_LACA && DECTNRP_DRIVER_NRF91_BAND_GROUP = 0
+	default 3 if SOC_NRF9131_LACA && DECTNRP_DRIVER_NRF91_BAND_GROUP = 0
+	default 2 if SOC_NRF9151_LACA && DECTNRP_DRIVER_NRF91_BAND_GROUP = 0
+	default 3 if SOC_NRF9151_LACA && DECTNRP_DRIVER_NRF91_BAND_GROUP = 1
+	default -1
+	range 1 4
+
+config DECTNRP_DRIVER_NRF91_BAND_GROUP
+    int
+    default 0 if DECTNRP_DRIVER_BAND = 1 || DECTNRP_DRIVER_BAND = 2 || DECTNRP_DRIVER_BAND = 9 || DECTNRP_DRIVER_BAND = 22
+    default 1 if DECTNRP_DRIVER_BAND = 4
+    default 0
+
+config DECTNRP_DRIVER_RDCAP_NSS_RX_MAX
+	int
+	default 1
+
+config DECTNRP_DRIVER_RDCAP_RXTX_DIVERSITY_MAX
+	int
+	default 1
+
+config DECTNRP_DRIVER_RDCAP_RXGAIN_DB
+	int
+	default -4 
+
+config DECTNRP_DRIVER_RDCAP_MCS_MAX
+	int
+	default 4
+
+config DECTNRP_DRIVER_RDCAP_SOFTBUFFERSIZE_BYTES_MAX
+	int
+	default 25344
+
+config DECTNRP_DRIVER_RDCAP_HARQ_PROC_MAX
+	int
+	default 8
+
+config DECTNRP_DRIVER_RDCAP_HARQ_FEEDBACKDELAY
+	int
+	default 2
+
+config DECTNRP_DRIVER_RDCAP_MU_MAX
+	int
+	default 1
+
+config DECTNRP_DRIVER_RDCAP_BETA_MAX
+	int
+	default 1
+
+config DECTNRP_DRIVER_MODEMTICKS_PER_SYMBOL
+	int
+	default 2880
+
+endmenu  # "DECTNRP Radio capabilities interface"
+
+endmenu  # "DECTNRP Radio interface"
+
+config DECTNRP_DRIVER_NRF91_CAP_LOGGING
+	bool "Enable printing of radio capabilities at startup"
+	default n
 
 module = DECTNRP_DRIVER_NRF91
 module-str = DECT NR+ NRF91 driver

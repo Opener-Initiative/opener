@@ -1,0 +1,134 @@
+# Copyright (c) 2026 Deveritec GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+menu "DECTNRP Radio interface"
+# Following configs belong to the radio interface.
+
+menu "DECTNRP Radio capabilities interface"
+# Following configs specify hard coded radio capabilities.
+# They are meant to be propagated up to L2 layer to control its behaviour.
+# The radio driver must override these values.
+
+config DECTNRP_RADIO_RDCAP_DECTNRP_RELEASE
+	int
+	default 1
+	range 1 4
+	help
+	  DECT NR+ release capability supported by the driver.
+	  The radio driver must override this value.
+
+config DECTNRP_RADIO_RDCAP_POWERCLASS_MAX
+	int
+	default 1
+	range 1 4
+	help
+	  Maximum radio power class supported by the driver.
+	  The radio driver must override this value.
+
+config DECTNRP_RADIO_RDCAP_NSS_RX_MAX
+	int
+	default 1
+	range 1 8
+	help
+	  Maximum number of supported spatial streams supported by the driver.
+	  The radio driver must override this value.
+	  Supported values: 1, 2, 4, 8
+
+config DECTNRP_RADIO_RDCAP_RXTX_DIVERSITY_MAX
+	int
+	default 1
+	range 1 8
+	help
+	  The maximum supported RX/TX diversity capability supported by the driver.
+	  The radio driver must override this value.
+	  Supported values: 1, 2, 4, 8
+
+config DECTNRP_RADIO_RDCAP_RXGAIN_DB
+	int
+	default 0
+	range -10 6
+	help
+	  Receiver gain capability expressed in dB supported by the driver.
+	  The radio driver must override this value.
+	  Supported values: -10, -8, -6, -4, -2, 0, 2, 4, 6
+
+config DECTNRP_RADIO_RDCAP_MCS_MAX
+	int
+	default 11
+	range 0 11
+	help
+	  Maximum supported modulation and coding scheme supported by the driver.
+	  The radio driver must override this value.
+
+config DECTNRP_RADIO_RDCAP_SOFTBUFFERSIZE_BYTES_MAX
+	int
+	default 64000
+	range 16000 2048000
+	help
+	  The maximum supported HARQ soft buffer size in bytes supported by the driver.
+	  The radio driver must override this value.
+	  Supported values: 16000, 25344, 32000, 64000, 128000, 256000, 512000,
+	  1024000, 2048000
+
+config DECTNRP_RADIO_RDCAP_HARQ_PROC_MAX
+	int
+	default 1
+	range 1 8
+	help
+	  Maximum number of HARQ processes supported by the driver.
+	  The radio driver must override this value.
+	  Supported values: 1, 2, 4, 8
+
+config DECTNRP_RADIO_RDCAP_HARQ_FEEDBACKDELAY
+	int
+	default 3
+	range 0 6
+	help
+	  HARQ feedback delay in frames supported by the driver.
+	  The radio driver must override this value.
+
+config DECTNRP_RADIO_RDCAP_MU_MAX
+	int
+	default 1
+	range 1 8
+	help
+	  Maximum subcarrier scaling factor mu(µ) supported by the driver.
+	  The radio driver must override this value.
+	  Supported values: 1, 2, 4, 8
+
+config DECTNRP_RADIO_RDCAP_BETA_MAX
+	int
+	default 1
+	range 1 16
+	help
+	  Maximum fourier transform scaling factor beta(β) supported by the driver.
+	  The radio driver must override this value.
+	  Supported values: 1, 2, 4, 8, 12, 16
+
+config DECTNRP_RADIO_RDCAP_SYNC_IN
+	bool
+	help
+	  Flag marking support for synchronization input GPIO.
+
+config DECTNRP_RADIO_RDCAP_SYNC_OUT
+	bool
+	help
+	  Flag marking support for synchronization output GPIO.
+
+config DECTNRP_RADIO_MODEMTICKS_PER_SYMBOL
+	int 
+	default 1
+	help
+	  Number of modem ticks that represent a single OFDM symbol.
+	  The radio driver must override this value.
+
+endmenu  # "DECTNRP Radio capabilities interface"
+
+menu "DECTNRP Radio control interface"
+# Following configs specify hard coded control switches for the radio.
+# They are meant to be propagated down to radio to control its behaviour.
+# The radio driver must use these values.
+
+endmenu  # "DECTNRP Radio control interface"
+
+endmenu  # "DECTNRP Radio interface"
