@@ -16,6 +16,6 @@ config DECTNRP_DRIVER_BLOCKING_API
 
 endchoice
 
-rsource "Kconfig.nrf91"
+rsource "Kconfig.nrf91x1"
 
 endmenu
