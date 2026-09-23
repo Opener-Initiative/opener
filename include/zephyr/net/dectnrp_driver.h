@@ -251,7 +251,9 @@ struct dectnrp_driver_event {
 
 			/** Related start time. */
 			net_time_t start_time;
-			/** Points to PCC if pcc_valid == true.  */
+			/** Reference to PCC buffer if pcc_valid == true.
+			 * @attention The assigned buffer is only valid until the event callback returns - after that the driver may reuse it!
+			 */
 			const uint8_t *pcc;
 			/** RSSI2 value of this message.
 			 *  Encoded according to @ref ETSI TS 103 636-2 chapter 8.3.
@@ -285,9 +287,15 @@ struct dectnrp_driver_event {
 
 			/** Related start time. */
 			net_time_t start_time;
-			/** Points to PCC.  */
+			/** Reference to PCC buffer.
+			 * @attention The assigned buffer is only valid until the event callback returns - after that the driver may reuse it!
+			 */
 			const uint8_t *pcc;
-			/** Points to PDC.  */
+			/** Number of bytes of PCC. */
+			uint8_t pcc_len;
+			/** Reference to PDC buffer.
+			 * @attention The assigned buffer is only valid until the event callback returns - after that the driver may reuse it!
+			 */
 			const uint8_t *pdc;
 			/** Number of bytes of PDC. */
 			uint32_t pdc_len;
@@ -327,8 +335,10 @@ struct dectnrp_driver_event {
 
 #endif /* CONFIG_DECTNRP_DRIVER_SCHEDULED_API */
 
-/** Event callback function the dectnrp_driver is notifying events up to the stack.  */
-typedef void (*dectnrp_driver_event_cb_t)(const struct device *dev,
+/** Event callback function the dectnrp_driver is notifying events up to the stack. 
+ * @attention The @p event is only valid until the event callback returns - after that the driver may reuse it!
+ */
+typedef void (*dectnrp_driver_event_cb_t)(struct net_if *iface,
 					  const struct dectnrp_driver_event *event);
 
 /**
