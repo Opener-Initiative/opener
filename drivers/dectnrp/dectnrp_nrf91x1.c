@@ -620,7 +620,7 @@ static void modem_pcc_crc_err(struct nrf91x1_context *ctx, const uint64_t *time,
 			stack_event.message_error.snr = dectnrp_nrf91x1_encode_snr(event->snr);
 		}
 
-		ctx->upper_layer_event_handler(nrf91x1_dev, &stack_event);
+		ctx->upper_layer_event_handler(ctx->iface, &stack_event);
 	}
 }
 
@@ -657,6 +657,9 @@ static void modem_pdc_received(struct nrf91x1_context *ctx, const uint64_t *time
 				.msg_received.op = op,
 				.msg_received.phy_type = ctx->rx.pcc_event.phy_type,
 				.msg_received.pcc = &ctx->rx.pcc_event.hdr.type_1[0],
+				.msg_received.pcc_len = ctx->rx.pcc_event.phy_type == 0
+                                  ? DECTNRP_PHY_HEADER_TYPE1_SIZE
+                                  : DECTNRP_PHY_HEADER_TYPE2_SIZE,
 				.msg_received.pdc = event->data,
 				.msg_received.pdc_len = event->len,
 				.msg_received.start_time = ctx->rx.pcc_event.stf_start_time,
@@ -676,7 +679,7 @@ static void modem_pdc_received(struct nrf91x1_context *ctx, const uint64_t *time
 					dectnrp_nrf91x1_encode_snr(event->snr);
 			}
 
-			ctx->upper_layer_event_handler(nrf91x1_dev, &stack_event);
+			ctx->upper_layer_event_handler(ctx->iface, &stack_event);
 		}
 	}
 }
@@ -736,7 +739,7 @@ static void modem_pdc_crc_err(struct nrf91x1_context *ctx, const uint64_t *time,
 					dectnrp_nrf91x1_encode_snr(event->snr);
 			}
 
-			ctx->upper_layer_event_handler(nrf91x1_dev, &stack_event);
+			ctx->upper_layer_event_handler(ctx->iface, &stack_event);
 		}
 	}
 }
@@ -773,7 +776,7 @@ static void modem_op_complete_cb(struct nrf91x1_context *ctx, const uint64_t *ti
 		struct dectnrp_driver_event stack_event = {.code = DECTNRP_EVENT_OP_FINISHED,
 							   .op_finished.op = op};
 		op->status = -event->err; // FIXME use generic error codes
-		ctx->upper_layer_event_handler(nrf91x1_dev, &stack_event);
+		ctx->upper_layer_event_handler(ctx->iface, &stack_event);
 	}
 }
 
