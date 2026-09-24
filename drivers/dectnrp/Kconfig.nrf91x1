@@ -5,7 +5,7 @@
 config DECTNRP_DRIVER_NRF91X1
     bool "DECT NR+ NRF91X1 driver"
     default y
-    depends on SOC_SERIES_NRF91X
+    depends on SOC_SERIES_NRF91
     depends on NRF_MODEM_LIB
     depends on !MODEM_ANTENNA
     depends on NRF_MODEM_LINK_BINARY_DECT_PHY
