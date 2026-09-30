@@ -3,6 +3,6 @@
 
 zephyr_library_named(dectnrp_driver)
 
-zephyr_library_sources_ifdef(CONFIG_DECTNRP_DRIVER_NRF91
+zephyr_library_sources_ifdef(CONFIG_DECTNRP_DRIVER_NRF91X1
     dectnrp_nrf91x1.c
 )
