@@ -16,6 +16,7 @@ LOG_MODULE_REGISTER(dectnrp_nrf91x1, CONFIG_DECTNRP_DRIVER_NRF91X1_LOG_LEVEL);
 #include <zephyr/sys/util.h>
 #include <zephyr/net/net_time.h>
 #include <zephyr/net/net_pkt.h>
+#include <zephyr/net/net_log.h>
 #include <modem/nrf_modem_lib.h>
 #include <nrf_modem_dect_phy.h>
 #include <nrf_modem_at.h>
@@ -658,8 +659,8 @@ static void modem_pdc_received(struct nrf91x1_context *ctx, const uint64_t *time
 				.msg_received.phy_type = ctx->rx.pcc_event.phy_type,
 				.msg_received.pcc = &ctx->rx.pcc_event.hdr.type_1[0],
 				.msg_received.pcc_len = ctx->rx.pcc_event.phy_type == 0
-                                  ? DECTNRP_PHY_HEADER_TYPE1_SIZE
-                                  : DECTNRP_PHY_HEADER_TYPE2_SIZE,
+								? DECTNRP_PHY_HEADER_TYPE1_SIZE
+								: DECTNRP_PHY_HEADER_TYPE2_SIZE,
 				.msg_received.pdc = event->data,
 				.msg_received.pdc_len = event->len,
 				.msg_received.start_time = ctx->rx.pcc_event.stf_start_time,
