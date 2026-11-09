@@ -58,6 +58,9 @@ enum nrf91x1_rx_state {
 	RADIO_RXSTATE_PDC = 0x2,
 };
 
+/** Radio mode activated by this driver, latencies are reported for this mode. */
+#define NRF91X1_RADIO_MODE NRF_MODEM_DECT_PHY_RADIO_MODE_LOW_LATENCY
+
 /**
  * @brief The context related to the one and only open nrf91x1 radio device.
  */
@@ -85,6 +88,20 @@ struct nrf91x1_context {
 		uint8_t mu;
 		uint8_t beta;
 	} modem;
+
+	/** Modem latencies in NRF91X1_RADIO_MODE, in modem ticks, see
+	 * struct dectnrp_device_capabilities.
+	 */
+	struct {
+		uint32_t sched_op_transition;
+		uint32_t sched_op_startup;
+		uint32_t rx_startup;
+		uint32_t rx_shutdown;
+		uint32_t rssi_shutdown;
+		uint32_t tx_startup;
+		uint32_t tx_shutdown;
+		uint32_t stop_to_rf_off;
+	} latency;
 
 	/** Configured network-id. */
 	uint32_t network_id;
@@ -406,6 +423,7 @@ static void modem_band_get_cb(struct nrf91x1_context *ctx, const uint64_t *time,
  * @attention This function should be used in blocking mode, it releases ctx->modemlock!
  *
  * * Prints out latency information.
+ * * Stores the latencies reported in device capabilities.
  * * Store last_status.
  * * Unblocks ctx->modemlock.
  *
@@ -418,6 +436,18 @@ static void modem_latency_get_cb(struct nrf91x1_context *ctx, const uint64_t *ti
 {
 	if (event->err == NRF_MODEM_DECT_PHY_SUCCESS) {
 		struct nrf_modem_dect_phy_latency_info *latency_info = event->latency_info;
+
+		ctx->latency.sched_op_transition =
+			latency_info->radio_mode[NRF91X1_RADIO_MODE].scheduled_operation_transition;
+		ctx->latency.sched_op_startup =
+			latency_info->radio_mode[NRF91X1_RADIO_MODE].scheduled_operation_startup;
+		ctx->latency.rx_startup = latency_info->operation.receive.idle_to_active;
+		ctx->latency.rx_shutdown = latency_info->operation.receive.active_to_idle_rx;
+		ctx->latency.rssi_shutdown = latency_info->operation.receive.active_to_idle_rssi;
+		ctx->latency.tx_startup = latency_info->operation.transmit.idle_to_active;
+		ctx->latency.tx_shutdown = latency_info->operation.transmit.active_to_idle;
+		ctx->latency.stop_to_rf_off = latency_info->operation.receive.stop_to_rf_off;
+
 		if (IS_ENABLED(CONFIG_DECTNRP_DRIVER_NRF91X1_CAP_LOGGING)) {
 			LOG_WRN("<%lld> PHY_EVT_LATENCY", *time);
 			LOG_WRN(" RX:");
@@ -568,7 +598,7 @@ static void modem_pcc_received(struct nrf91x1_context *ctx, const uint64_t *time
 	} else if (event->header_status == NRF_MODEM_DECT_PHY_HDR_STATUS_INVALID) {
 		LOG_WRN("PHY_EVT_PCC,HDR_STATUS_INVALID,dropped");
 		// TODO Event is completly lost, signalize to upper layer.
-	} else if (event->header_status == NRF_MODEM_DECT_PHY_HDR_STATUS_INVALID) {
+	} else if (event->header_status == NRF_MODEM_DECT_PHY_HDR_STATUS_VALID_RX_END) {
 		LOG_WRN("PHY_EVT_PCC,HDR_STATUS_VALID_RX_END,dropped");
 		// TODO Event is completly lost, signalize to upper layer.
 	} else {
@@ -683,6 +713,12 @@ static void modem_pdc_received(struct nrf91x1_context *ctx, const uint64_t *time
 			ctx->upper_layer_event_handler(ctx->iface, &stack_event);
 		}
 	}
+
+	/* The message is complete: the next PCC belongs to the next message, in the same
+	 * operation when the reception mode is continuous or semi-continuous.
+	 */
+	atomic_clear_bit(&ctx->rx.state, RADIO_RXSTATE_PCC);
+	atomic_clear_bit(&ctx->rx.state, RADIO_RXSTATE_PDC);
 }
 
 /**
@@ -743,6 +779,10 @@ static void modem_pdc_crc_err(struct nrf91x1_context *ctx, const uint64_t *time,
 			ctx->upper_layer_event_handler(ctx->iface, &stack_event);
 		}
 	}
+
+	/* The message is complete, see modem_pdc_received(). */
+	atomic_clear_bit(&ctx->rx.state, RADIO_RXSTATE_PCC);
+	atomic_clear_bit(&ctx->rx.state, RADIO_RXSTATE_PDC);
 }
 
 /**
@@ -767,11 +807,11 @@ static void modem_op_complete_cb(struct nrf91x1_context *ctx, const uint64_t *ti
 
 	struct dectnrp_driver_op *op = (void *)event->handle;
 
-	bool rx = atomic_test_bit(&ctx->rx.state, RADIO_RXSTATE_PDC);
-	if (rx) {
-		atomic_clear_bit(&ctx->rx.state, RADIO_RXSTATE_PCC);
-		atomic_clear_bit(&ctx->rx.state, RADIO_RXSTATE_PDC);
-	}
+	/* A PCC may have been received without its PDC (e.g. the operation ended in between):
+	 * drop it, so that it does not block the next operation.
+	 */
+	atomic_clear_bit(&ctx->rx.state, RADIO_RXSTATE_PCC);
+	atomic_clear_bit(&ctx->rx.state, RADIO_RXSTATE_PDC);
 
 	if (ctx->upper_layer_event_handler) {
 		struct dectnrp_driver_event stack_event = {.code = DECTNRP_EVENT_OP_FINISHED,
@@ -1032,7 +1072,7 @@ static int nrf91x1_start(const struct device *dev)
 		ret = -EALREADY;
 		goto error;
 	} else {
-		ret = nrf_modem_dect_phy_activate(NRF_MODEM_DECT_PHY_RADIO_MODE_LOW_LATENCY);
+		ret = nrf_modem_dect_phy_activate(NRF91X1_RADIO_MODE);
 		if (ret < 0) {
 			NET_ERR("nrf_modem_dect_phy_activate failed,%d", ret);
 			ret = -EIO;
@@ -1107,8 +1147,18 @@ out:
 static int nrf91x1_get_capabilities(const struct device *dev,
 				    struct dectnrp_device_capabilities *caps)
 {
+	struct nrf91x1_context *ctx = dev->data;
+
 	LOG_INF("nrf91x1_get_capabilities(%s)", dev->name);
 	caps->hw_caps = (DECTNRP_HW_FILTER | DECTNRP_HW_TXTIME | DECTNRP_HW_RXTIME);
+	caps->sched_op_transition = ctx->latency.sched_op_transition;
+	caps->sched_op_startup = ctx->latency.sched_op_startup;
+	caps->rx_startup = ctx->latency.rx_startup;
+	caps->rx_shutdown = ctx->latency.rx_shutdown;
+	caps->rssi_shutdown = ctx->latency.rssi_shutdown;
+	caps->tx_startup = ctx->latency.tx_startup;
+	caps->tx_shutdown = ctx->latency.tx_shutdown;
+	caps->stop_to_rf_off = ctx->latency.stop_to_rf_off;
 	return 0;
 }
 
@@ -1286,10 +1336,29 @@ static int nrf91x1_schedule(const struct device *dev, struct dectnrp_driver_op *
 	}
 	case DECTNRP_DRIVER_OP_RX: {
 
+		enum nrf_modem_dect_phy_rx_mode rx_mode;
+
+		switch (op->rx.mode.reception) {
+		case DECTNRP_RX_RECEPTION_SINGLE_SHOT:
+			rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_SINGLE_SHOT;
+			break;
+		case DECTNRP_RX_RECEPTION_SEMICONTINUOUS:
+			rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_SEMICONTINUOUS;
+			break;
+		case DECTNRP_RX_RECEPTION_CONTINUOUS:
+			rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_CONTINUOUS;
+			break;
+		default:
+			NET_ERR("[%p]nrf91x1_schedule invalid rx reception mode %d", op,
+				op->rx.mode.reception);
+			ret = -EINVAL;
+			goto out;
+		}
+
 		struct nrf_modem_dect_phy_rx_params rx_params = {
 			.handle = (uintptr_t)op,
 			.network_id = ctx->network_id,
-			.mode = NRF_MODEM_DECT_PHY_RX_MODE_SINGLE_SHOT,
+			.mode = rx_mode,
 			.link_id = NRF_MODEM_DECT_PHY_LINK_UNSPECIFIED,
 			.rssi_level = 0, /* fast AGC algorithm */
 			.carrier = op->channel,
