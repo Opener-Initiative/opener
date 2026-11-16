@@ -593,9 +593,15 @@ static void modem_pcc_received(struct nrf91x1_context *ctx, const uint64_t *time
 		(rssi_2 & 0b1) * 5, event->snr);
 
 	if (atomic_test_bit(&ctx->rx.state, RADIO_RXSTATE_PCC)) {
-		LOG_WRN("PHY_EVT_PCC overrun,pcc dropped");
-		// TODO Event is completly lost, signalize to upper layer.
-	} else if (event->header_status == NRF_MODEM_DECT_PHY_HDR_STATUS_INVALID) {
+		/* A new transaction has started; the PDC of the stored PCC is not expected
+		 * to arrive. Drop the stale PCC in favor of the newly received PCC.
+		 */
+		LOG_WRN("PHY_EVT_PCC,overrun,stale pcc dropped");
+		// TODO Stored PCC is stale, signalize to upper layer.
+		atomic_clear_bit(&ctx->rx.state, RADIO_RXSTATE_PCC);
+	}
+
+	if (event->header_status == NRF_MODEM_DECT_PHY_HDR_STATUS_INVALID) {
 		LOG_WRN("PHY_EVT_PCC,HDR_STATUS_INVALID,dropped");
 		// TODO Event is completly lost, signalize to upper layer.
 	} else if (event->header_status == NRF_MODEM_DECT_PHY_HDR_STATUS_VALID_RX_END) {
