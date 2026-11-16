@@ -26,7 +26,11 @@ jobs:
         run: |
           set -euo pipefail
           files=$(git diff --name-only --diff-filter=ACMR "$BASE_SHA"..."$HEAD_SHA" -- '*.c' '*.h')
+          status=0
           for f in $files; do
-            clang-format --dry-run --Werror "$f" ||
-              echo "::warning file=$f::violation of coding style guidelines detected; please run clang-format"
+            clang-format --dry-run --Werror "$f" || {
+              echo "::error file=$f::violation of coding style guidelines detected; please run clang-format"
+              status=1
+            }
           done
+          exit $status
