@@ -8,4 +8,3 @@ Welcome to the Opener DECT-2020 NR protocol stack documentation.
 
    build/index
    api/index
-   samples/index
