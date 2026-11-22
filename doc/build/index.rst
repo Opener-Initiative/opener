@@ -50,9 +50,9 @@ You must ensure the Zephyr environment is available (``ZEPHYR_BASE`` must be set
     cd <opener_path>/doc
     # If not already installed
     python -m pip install -r requirements.txt
-    cmake -GNinja -S. -Bdoc_output
-    cmake --build doc_output
-    cd doc_output
+    cmake -GNinja -S. -B_build
+    cmake --build _build
+    cd _build
     python -m http.server
 
 Access the documentation at http://localhost:8000/html/opener
