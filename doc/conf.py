@@ -123,3 +123,8 @@ templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 root_doc = "index"
+
+# -- Options for notfound plugin -----------------------------------------------
+
+# GitHub Pages serves the docs under /opener/
+notfound_urls_prefix = "/opener/"

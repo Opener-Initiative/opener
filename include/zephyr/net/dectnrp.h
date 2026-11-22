@@ -22,7 +22,6 @@ extern "C" {
 /**
  * @defgroup dectnrp DECT NR+
  * @version 0.0.1
- * @ingroup connectivity
  *
  * @brief DECT NR+ native L2, configuration, management and driver APIs
  *
@@ -61,23 +60,23 @@ extern "C" {
 #define DECTNRP_PHY_HEADER_TYPE2_SIZE 10
 
 /** @brief Long broadcast address.
- *  @ref ETSI TS 103 636-4, Table 4.2.3.2-1: Use of Long RD ID address space */
+ *  @see ETSI TS 103 636-4, Table 4.2.3.2-1: Use of Long RD ID address space */
 #define DECTNRP_LONG_BROADCAST_ADDRESS  UINT_MAX
 /** @brief Short broadcast address.
- *  @ref ETSI TS 103 636-4, Table 4.2.3.3-1: Use of Short RD ID address space */
+ *  @see ETSI TS 103 636-4, Table 4.2.3.3-1: Use of Short RD ID address space */
 #define DECTNRP_SHORT_BROADCAST_ADDRESS USHRT_MAX
 
 /** @brief Minimum supported RSSI1/2 value.
- *  @ref ETSI TS 103 636-2, Table 8.3.3-1: RSSI-2 measurement report mapping */
+ *  @see ETSI TS 103 636-2, Table 8.3.3-1: RSSI-2 measurement report mapping */
 #define DECTNRP_RSSI_MIN -140
 /** @brief Maximum supported RSSI1/2 value.
- *  @ref ETSI TS 103 636-2, Table 8.3.3-1: RSSI-2 measurement report mapping */
+ *  @see ETSI TS 103 636-2, Table 8.3.3-1: RSSI-2 measurement report mapping */
 #define DECTNRP_RSSI_MAX -1
 /** @brief Minimum supported SNR value.
- *  @ref ETSI TS 103 636-2, Table 8.4.3-1: Demodulated signal to noise quality */
+ *  @see ETSI TS 103 636-2, Table 8.4.3-1: Demodulated signal to noise quality */
 #define DECTNRP_SNR_MIN  -16
 /** @brief Maximum supported SNR value.
- *  @ref ETSI TS 103 636-2, Table 8.4.3-1: Demodulated signal to noise quality */
+ *  @see ETSI TS 103 636-2, Table 8.4.3-1: Demodulated signal to noise quality */
 #define DECTNRP_SNR_MAX  64
 
 /** @brief The number of slots contained in any frame. */
