@@ -1,4 +1,20 @@
 # Copyright (c) 2026 Deveritec GmbH
 # SPDX-License-Identifier: Apache-2.0
 
+menuconfig NET_L2_DECTNRP
+	bool "DECTNRP Radio"
+	select NET_L2_PHY_DECTNRP
+	help
+	  Add support for ETSI TS 103 636 DECTNRP NR+ technology.
+
+if NET_L2_DECTNRP
+
+module = NET_L2_DECTNRP
+module-dep = NET_LOG
+module-str = Log level for ETSI TS 103 636
+module-help = Enables ETSI TS 103 636 code to output debug messages.
+source "subsys/net/Kconfig.template.log_config.net"
+
 rsource "Kconfig.radio"
+
+endif # NET_L2_DECTNRP

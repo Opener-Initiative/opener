@@ -1,0 +1,18 @@
+# Copyright (c) 2026 Deveritec GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+# Dectnrp stack is not directly integrated into Zephyr but is implemented as a module.
+# Following code makes the dectnrp l2 known and would live in
+# deps/zephyr/isubsys/net/l2/Kconfig. For example NET_L2_PHY_IEEE802154 is declared at
+# https://github.com/zephyrproject-rtos/zephyr/blob/a6eef0ba3755f2530c5ce93524e5ac4f5be30194/subsys/net/l2/Kconfig#L75
+
+menu "Link layer options"
+
+config NET_L2_PHY_DECTNRP
+	bool
+	help
+	  A common config for all DECTNRP based L2 implementations.
+
+rsource "dectnrp/Kconfig"
+
+endmenu
