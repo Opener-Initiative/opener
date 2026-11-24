@@ -17,6 +17,8 @@
 #ifndef ZEPHYR_NET_DECTNRP_NET_L2_H_
 #define ZEPHYR_NET_DECTNRP_NET_L2_H_
 
+#include <zephyr/net/net_l2.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

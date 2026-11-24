@@ -1,7 +1,33 @@
 # Copyright (c) 2026 Codium Electronique
+# Copyright (c) 2026 Deveritec GmbH
 # SPDX-License-Identifier: Apache-2.0
 
-menu "DECT NR+ driver"
+menuconfig DECTNRP
+	bool "DECTNRP drivers"
+	depends on NETWORKING
+	default y if NET_L2_PHY_DECTNRP
+
+if DECTNRP
+
+config DECTNRP_NET_IF_NO_AUTO_START
+	bool "DECTNRP interface without auto-start"
+	help
+	  This option allows user to set any configuration and/or filter before
+	  the radio becomes operational.
+	  When all configurations are done net_if_up() has to be invoked to
+	  bring the interface up.
+
+	  If you have any doubt about this option leave it as default value.
+
+if !NET_L2_PHY_DECTNRP
+config DECTNRP_RAW_MODE
+	bool "DECTNRP driver without the MAC stack"
+	select NET_RAW_MODE
+	help
+	  This option enables using the drivers in a so-called "raw" mode,
+	  i.e. without a MAC stack (the net L2 layer for DECTNRP will not
+	  be built). Used only for very specific cases.
+endif # !NET_L2_PHY_DECTNRP
 
 choice DECTNRP_DRIVER_API
     prompt "DECT NR+ driver API"
@@ -18,4 +44,9 @@ endchoice
 
 rsource "Kconfig.nrf91x1"
 
-endmenu
+module = DECTNRP_DRIVER
+module-str = DECTNRP driver
+module-help = Sets log level for DECTNRP Device Drivers.
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # DECTNRP
